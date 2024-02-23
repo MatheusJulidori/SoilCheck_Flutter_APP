@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:soilcheck/providers/auth_provider.dart';
 import 'package:soilcheck/views/login_view.dart';
 
 void main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  await dotenv.load();
   runApp(MultiProvider(
     providers: [
-      //ChangeNotifierProvider(create: (_) => AuthController()),
+      ChangeNotifierProvider(create: (_) => AuthController()),
       //ChangeNotifierProvider(create: (_) => ModelosController()),
       //ChangeNotifierProvider(create: (_) => ChecksController())
     ],
