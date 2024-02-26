@@ -8,4 +8,12 @@ class Template {
     required this.fields,
     this.id,
   });
+
+  factory Template.fromJson(Map<String, dynamic> json) {
+    return Template(
+      name: json['name'],
+      fields: json['fields'],
+      id: json['_id'],
+    );
+  }
 }

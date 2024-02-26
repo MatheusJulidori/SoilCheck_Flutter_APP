@@ -4,8 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
-
-class AuthController extends ChangeNotifier {
+class AuthProvider extends ChangeNotifier {
   final AuthService apiService = AuthService();
   String? _token;
   bool _isLoggedIn = false;
@@ -18,7 +17,6 @@ class AuthController extends ChangeNotifier {
   String get userId => _userId;
 
   Future<String> login(String username, String password) async {
-
     username = username.trim();
     final response = await apiService.login(username, password);
 
@@ -33,6 +31,7 @@ class AuthController extends ChangeNotifier {
       _isLoggedIn = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('token', _token!);
+      prefs.setString('userId', _userId);
       notifyListeners();
       return "ok";
     } else {
@@ -43,5 +42,4 @@ class AuthController extends ChangeNotifier {
       return error;
     }
   }
- 
 }

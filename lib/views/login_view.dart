@@ -14,11 +14,13 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final FocusNode _usernameFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
   bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
-    var authProvider = Provider.of<AuthController>(context);
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -52,25 +54,36 @@ class _LoginViewState extends State<LoginView> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        _buildTextField(_usernameController, 'Email', false),
+                        _buildTextField(_usernameController, 'Email', false,
+                            focusNode: _usernameFocusNode,
+                            textInputAction: TextInputAction.next,
+                            nextFocusNode: _passwordFocusNode),
                         const SizedBox(height: 15),
-                        _buildTextField(_passwordController, 'Password', true),
+                        _buildTextField(_passwordController, 'Password', true,
+                            focusNode: _passwordFocusNode,
+                            textInputAction: TextInputAction.done),
                         const SizedBox(height: 25),
                         LoadingButton(
+                          width: double.infinity,
                           onExecute: () async {
+                            var localNavigator = Navigator.of(context);
                             var res = await authProvider.login(
                               _usernameController.text,
                               _passwordController.text,
                             );
                             if (res == 'ok') {
-                              Navigator.pushReplacementNamed(context, '/home');
+                              if (localNavigator.mounted) {
+                                localNavigator.pushReplacementNamed('/home');
+                              }
                             } else {
-                              QuickAlert.show(
-                                context: context,
-                                type: QuickAlertType.error,
-                                title: 'Erro ao fazer login',
-                                text: res,
-                              );
+                              if (localNavigator.mounted) {
+                                QuickAlert.show(
+                                  context: localNavigator.context,
+                                  type: QuickAlertType.error,
+                                  title: 'Erro ao fazer login',
+                                  text: res,
+                                );
+                              }
                             }
                           },
                           buttonName: 'LOGIN',
@@ -88,10 +101,20 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Widget _buildTextField(
-      TextEditingController controller, String label, bool isPassword) {
+      TextEditingController controller, String label, bool isPassword,
+      {FocusNode? focusNode,
+      TextInputAction? textInputAction,
+      FocusNode? nextFocusNode}) {
     return TextField(
       controller: controller,
+      focusNode: focusNode,
       obscureText: isPassword ? !_isPasswordVisible : false,
+      textInputAction: textInputAction,
+      onSubmitted: (value) {
+        if (textInputAction != TextInputAction.done) {
+          nextFocusNode?.requestFocus();
+        }
+      },
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.grey),

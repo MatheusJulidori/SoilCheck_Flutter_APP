@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:soilcheck/providers/auth_provider.dart';
+import 'package:soilcheck/providers/user_provider.dart';
+import 'package:soilcheck/views/homepage.dart';
 import 'package:soilcheck/views/login_view.dart';
+import 'package:soilcheck/providers/navigation_provider.dart';
 
 void main() async {
   await dotenv.load();
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => AuthController()),
+      ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider(create: (_) => NavigationProvider()),
+      ChangeNotifierProvider(create: (_) => UserProvider())
       //ChangeNotifierProvider(create: (_) => ModelosController()),
       //ChangeNotifierProvider(create: (_) => ChecksController())
     ],
@@ -25,6 +30,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'SoilCheck',
       theme: Theme.of(context).copyWith(
+     
         primaryColor: const Color(0xff528c4f),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Color(0xff528c4f),
@@ -45,7 +51,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const LoginView(),
-        //'/home': (context) => const HomeView(),
+        '/home': (context) => HomeScreen(),
         //'/modelos': (context) => ModeloTesteView(),
         //'/checks': (context) => const Check()
       },
