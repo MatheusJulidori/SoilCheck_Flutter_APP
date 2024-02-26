@@ -15,7 +15,7 @@ class AuthService {
     };
     final jsonData = jsonEncode(data);
     final res = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
+      Uri.parse('$baseUrl/user/login'),
       headers: headers,
       body: jsonData,
     );

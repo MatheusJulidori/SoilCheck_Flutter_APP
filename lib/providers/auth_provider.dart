@@ -10,23 +10,25 @@ class AuthController extends ChangeNotifier {
   String? _token;
   bool _isLoggedIn = false;
   bool _isAdmin = false;
-  String _email = '';
+  String _userId = '';
 
   bool get isLoggedIn => _isLoggedIn;
   String? get token => _token;
   bool get isAdmin => _isAdmin;
-  String get email => _email;
+  String get userId => _userId;
 
-  Future<String> login(String email, String password) async {
-    final response = await apiService.login(email, password);
+  Future<String> login(String username, String password) async {
+
+    username = username.trim();
+    final response = await apiService.login(username, password);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      _token = data['access_token'];
+      _token = data['token'];
       if (_token != null) {
         Map<String, dynamic> decodedToken = JwtDecoder.decode(_token!);
         _isAdmin = decodedToken['isAdmin'];
-        _email = decodedToken['username'];
+        _userId = decodedToken['_id'];
       }
       _isLoggedIn = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
