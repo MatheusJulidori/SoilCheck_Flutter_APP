@@ -18,7 +18,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Background is white
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: Column(
@@ -26,10 +26,9 @@ class _LoginViewState extends State<LoginView> {
             children: <Widget>[
               Expanded(
                 child: ClipPath(
-                  clipper: BottomLeftClipper(), // Custom clipper defined below
+                  clipper: BottomLeftClipper(),
                   child: Container(
-                    color: Color.fromARGB(
-                        255, 19, 102, 35), // Top part with new color
+                    color: Color.fromARGB(255, 19, 102, 35),
                     child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -85,8 +84,7 @@ class _LoginViewState extends State<LoginView> {
           borderRadius: BorderRadius.circular(25.7),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide:
-              const BorderSide(color: Color(0xFF9DB25D)), // Focus border color
+          borderSide: const BorderSide(color: Color(0xFF9DB25D)),
           borderRadius: BorderRadius.circular(25.7),
         ),
       ),
@@ -98,11 +96,11 @@ class BottomLeftClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = Path();
-    path.lineTo(0, size.height - 200); // Start from the top left corner
-    path.quadraticBezierTo(0, size.height, 200, size.height); // Create the curve
-    path.lineTo(size.width, size.height); // Bottom edge
-    path.lineTo(size.width, 0); // Right edge
-    path.close(); // Completes the path to the starting point
+    path.lineTo(0, size.height - 100);
+    path.quadraticBezierTo(0, size.height, 150, size.height);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width, 0);
+    path.close();
     return path;
   }
 
