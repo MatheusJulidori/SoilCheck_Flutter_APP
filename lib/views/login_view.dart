@@ -71,25 +71,40 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Widget _buildTextField(
-      TextEditingController controller, String label, bool obscureText) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.grey),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(25.7),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color(0xFF9DB25D)),
-          borderRadius: BorderRadius.circular(25.7),
-        ),
+Widget _buildTextField(
+    TextEditingController controller, String label, bool isPassword) {
+  return TextField(
+    controller: controller,
+    obscureText: isPassword ? !_isPasswordVisible : false,
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.grey),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(25.7),
       ),
-    );
-  }
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Color(0xFF9DB25D)),
+        borderRadius: BorderRadius.circular(25.7),
+      ),
+      suffixIcon: isPassword
+          ? IconButton(
+              icon: Icon(
+                // Toggle the icon based on password visibility
+                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                // Update the password visibility state
+                setState(() {
+                  _isPasswordVisible = !_isPasswordVisible;
+                });
+              },
+            )
+          : null,
+    ),
+  );
+}
 }
 
 class BottomLeftClipper extends CustomClipper<Path> {
