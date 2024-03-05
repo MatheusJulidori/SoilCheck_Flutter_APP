@@ -78,6 +78,38 @@ class UserService {
     return res;
   }
 
+  Future<http.Response> updateUserAdminStatus(String id, bool status) async {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+
+    final res = await http.put(
+      Uri.parse('$baseUrl/user/$id'),
+      headers: headers,
+      body: jsonEncode(<String, bool>{
+        'isAdmin': status,
+      }),
+    );
+
+    return res;
+  }
+
+  Future<http.Response> updateUserActiveStatus(String id, bool status) async {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+
+    final res = await http.put(
+      Uri.parse('$baseUrl/user/$id'),
+      headers: headers,
+      body: jsonEncode(<String, bool>{
+        'isActive': status,
+      }),
+    );
+
+    return res;
+  }
+
   Future<http.Response> updatePassword(String newPW, String oldPW) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 

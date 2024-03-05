@@ -23,6 +23,25 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<User>> getAllUsers() async {
+    final response = await apiService.getAllUsers();
+    List<User> users = [];
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      for (var user in data) {
+        users.add(User.fromJson(user));
+      }
+      notifyListeners();
+      return users;
+    } else {
+      final status = response.statusCode;
+      final message = response.body;
+      final reason = response.reasonPhrase;
+      final error = '$status $reason - $message';
+      throw Exception(error);
+    }
+  }
+
   Future<int> countChecks() async {
     final response = await apiService.countUserChecks();
 
@@ -30,6 +49,37 @@ class UserProvider extends ChangeNotifier {
       final data = json.decode(response.body);
       final count = data;
       return count;
+    } else {
+      final status = response.statusCode;
+      final message = response.body;
+      final reason = response.reasonPhrase;
+      final error = '$status $reason - $message';
+      throw Exception(error);
+    }
+  }
+
+  Future<bool> updateUserAdminStatus(String id, bool currentStatus) async {
+    final newStatus = !currentStatus;
+    final response = await apiService.updateUserAdminStatus(id, newStatus);
+    if (response.statusCode == 200) {
+      notifyListeners();
+      return true;
+    } else {
+      final status = response.statusCode;
+      final message = response.body;
+      final reason = response.reasonPhrase;
+      final error = '$status $reason - $message';
+      throw Exception(error);
+    }
+  }
+
+  Future<bool> updateUserActiveStatus(String id, bool currentStatus) async {
+    final newStatus = !currentStatus;
+    final response = await apiService.updateUserActiveStatus(id, newStatus);
+
+    if (response.statusCode == 200) {
+      notifyListeners();
+      return true;
     } else {
       final status = response.statusCode;
       final message = response.body;
@@ -54,8 +104,8 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-    Future<bool> updatePassword(String newPW, String oldPW) async {
-    final response = await apiService.updatePassword(newPW,oldPW);
+  Future<bool> updatePassword(String newPW, String oldPW) async {
+    final response = await apiService.updatePassword(newPW, oldPW);
 
     if (response.statusCode == 200) {
       notifyListeners();

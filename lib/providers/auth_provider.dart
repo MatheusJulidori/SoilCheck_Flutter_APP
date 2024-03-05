@@ -18,6 +18,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<String> login(String username, String password) async {
     username = username.trim();
+    username = username.toLowerCase();
     final response = await apiService.login(username, password);
 
     if (response.statusCode == 200) {
