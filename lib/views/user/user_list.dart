@@ -183,7 +183,7 @@ class _AdminPanelState extends State<AdminPanel> {
               ElevatedButton(
                 onPressed: () {
                   Provider.of<UserProvider>(context, listen: false)
-                      .updateUserAdminStatus(user.id!, user.isAdmin)
+                      .updateUserActiveStatus(user.id!, user.isAdmin)
                       .then((res) {
                     Navigator.of(context).pop();
                     String message;
