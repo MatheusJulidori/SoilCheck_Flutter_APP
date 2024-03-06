@@ -25,4 +25,14 @@ class User {
       id: json['_id'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'username': username,
+      'password': password,
+      'name': name,
+      'isAdmin': isAdmin,
+      'isActive': isActive,
+    };
+  }
 }

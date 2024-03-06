@@ -2,6 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:soilcheck/models/user.dart';
 
 class UserService {
   final String baseUrl = dotenv.env['API_URL']!;
@@ -128,6 +129,22 @@ class UserService {
         'newPassword': newPW,
         'oldPassword': oldPW,
       }),
+    );
+
+    return res;
+  }
+
+  Future<http.Response> createUser(User user) async {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+
+    Map<String, dynamic> userMap = user.toJson();
+
+    final res = await http.post(
+      Uri.parse('$baseUrl/user/'),
+      headers: headers,
+      body: jsonEncode(userMap),
     );
 
     return res;

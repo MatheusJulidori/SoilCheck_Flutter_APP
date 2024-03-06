@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:soilcheck/models/user.dart';
 import 'package:soilcheck/providers/user_provider.dart';
+import 'package:soilcheck/views/user/user_create.dart';
 
 class AdminPanel extends StatefulWidget {
   @override
@@ -15,6 +16,11 @@ class _AdminPanelState extends State<AdminPanel> {
 
   @override
   void initState() {
+    super.initState();
+    _fetchAllUsers();
+  }
+
+  void _fetchAllUsers() {
     Provider.of<UserProvider>(context, listen: false)
         .getAllUsers()
         .then((user) {
@@ -24,7 +30,6 @@ class _AdminPanelState extends State<AdminPanel> {
         });
       }
     });
-    super.initState();
   }
 
   @override
@@ -55,12 +60,32 @@ class _AdminPanelState extends State<AdminPanel> {
                       child: Column(
                         children: [
                           const SizedBox(height: 16.0),
-                          const Text(
-                            'Usuários',
-                            style: TextStyle(
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Usuários',
+                                style: TextStyle(
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              ElevatedButton.icon(
+                                icon: const Icon(Icons.add),
+                                onPressed: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) {
+                                      return CreateUser();
+                                    }),
+                                  );
+                                  if (result != null) {
+                                    _fetchAllUsers();
+                                  }
+                                },
+                                label: const Text('Adicionar'),
+                              )
+                            ],
                           ),
                           const SizedBox(height: 16.0),
                           Expanded(
@@ -150,8 +175,7 @@ class _AdminPanelState extends State<AdminPanel> {
     showDialog(
       context: context,
       builder: (context) {
-        final buttonText =
-            user.isAdmin ? 'Remover Admin' : 'Tornar Admin';
+        final buttonText = user.isAdmin ? 'Remover Admin' : 'Tornar Admin';
         final buttonText2 =
             user.isActive ? 'Desativar Usuário' : 'Ativar Usuário';
         return AlertDialog(
@@ -164,6 +188,7 @@ class _AdminPanelState extends State<AdminPanel> {
                   Provider.of<UserProvider>(context, listen: false)
                       .updateUserAdminStatus(user.id!, user.isAdmin)
                       .then((res) {
+                    _fetchAllUsers();
                     Navigator.of(context).pop();
                     String message;
                     if (res) {
@@ -185,6 +210,7 @@ class _AdminPanelState extends State<AdminPanel> {
                   Provider.of<UserProvider>(context, listen: false)
                       .updateUserActiveStatus(user.id!, user.isActive)
                       .then((res) {
+                    _fetchAllUsers();
                     Navigator.of(context).pop();
                     String message;
                     if (res) {

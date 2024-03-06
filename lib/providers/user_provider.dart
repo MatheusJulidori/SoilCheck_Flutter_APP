@@ -118,4 +118,21 @@ class UserProvider extends ChangeNotifier {
       throw Exception(error);
     }
   }
+
+  Future<User> createUser(User user) async {
+    final response = await apiService.createUser(user);
+
+    if (response.statusCode == 201) {
+      final data = json.decode(response.body);
+      final user = User.fromJson(data);
+      notifyListeners();
+      return user;
+    } else {
+      final status = response.statusCode;
+      final message = response.body;
+      final reason = response.reasonPhrase;
+      final error = '$status $reason - $message';
+      throw Exception(error);
+    }
+  }
 }
