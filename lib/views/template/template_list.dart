@@ -91,7 +91,11 @@ class _TemplatesMainState extends State<TemplatesMain> {
                                     MaterialPageRoute(builder: (context) {
                                       return CreateTemplate();
                                     }),
-                                  );
+                                  ).then((value) {
+                                    setState(() {
+                                      _fetchAllTemplates();
+                                    });
+                                  });
                                   if (result != null) {
                                     _fetchAllTemplates();
                                   }
@@ -105,7 +109,7 @@ class _TemplatesMainState extends State<TemplatesMain> {
                             controller: _searchController,
                             decoration: InputDecoration(
                               labelText: 'Filtrar Templates',
-                              suffixIcon: Icon(Icons.search),
+                              suffixIcon: const Icon(Icons.search),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(
                                     30.0), 
