@@ -37,10 +37,12 @@ class AuthProvider extends ChangeNotifier {
       return "ok";
     } else {
       final status = response.statusCode;
-      final message = response.body;
+      final message = json.decode(response.body);
+      final message2 = message['message'];
       final reason = response.reasonPhrase;
-      final error = '$status $reason - $message';
-      return error;
+      final error = '$status $reason - $message2';
+      debugPrint(error);
+      return message2;
     }
   }
 }
