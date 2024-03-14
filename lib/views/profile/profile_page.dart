@@ -61,6 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   SliverFillRemaining(
                     child: Container(
+                      color: const Color(0xFFf1f1f1),
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
