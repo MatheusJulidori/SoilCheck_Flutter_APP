@@ -3,11 +3,11 @@ class Checklist {
   final String? idFazenda;
   final String? idPivo;
   final String? idCliente;
-  final String? idTemplate;
-  final String? idResponsavel;
+  final String idTemplate;
+  final String idResponsavel;
   final DateTime dataCriacao;
   final DateTime dataAtualizacao;
-  final List<Map<String,dynamic>> fields;
+  final List<Map<String, dynamic>> fields;
   final String? id;
 
   Checklist({
@@ -15,8 +15,8 @@ class Checklist {
     this.idFazenda,
     this.idPivo,
     this.idCliente,
-    this.idTemplate,
-    this.idResponsavel,
+    required this.idTemplate,
+    required this.idResponsavel,
     required this.dataCriacao,
     required this.dataAtualizacao,
     required this.fields,
@@ -25,16 +25,37 @@ class Checklist {
 
   factory Checklist.fromJson(Map<String, dynamic> json) {
     return Checklist(
-      idRadio: json['idRadio'],
-      idFazenda: json['idFazenda'],
-      idPivo: json['idPivo'],
-      idCliente: json['idCliente'],
-      idTemplate: json['idTemplate'],
-      idResponsavel: json['idResponsavel'],
-      dataCriacao: DateTime.parse(json['dataCriacao']),
-      dataAtualizacao: DateTime.parse(json['dataAtualizacao']),
-      fields: json['fields'],
+      idRadio: json['id_radio'],
+      idFazenda: json['id_fazenda'] ?? '',
+      idPivo: json['id_pivo'] ?? '',
+      idCliente: json['id_cliente'] ?? '',
+      idTemplate: json['id_template'],
+      idResponsavel: json['id_responsavel'],
+      dataCriacao: DateTime.parse(json['data_criacao']),
+      dataAtualizacao: DateTime.parse(json['data_atualizacao']),
+      fields: List<Map<String, dynamic>>.from(
+          json['fields'].map((field) => Map<String, dynamic>.from(field))),
       id: json['_id'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = {
+      'idRadio': idRadio,
+      'idFazenda': idFazenda,
+      'idPivo': idPivo,
+      'idCliente': idCliente,
+      'idTemplate': idTemplate,
+      'idResponsavel': idResponsavel,
+      'dataCriacao': dataCriacao.toIso8601String(),
+      'dataAtualizacao': dataAtualizacao.toIso8601String(),
+      'fields': fields.map((field) => field).toList(),
+    };
+
+    if (id != null) {
+      json['_id'] = id;
+    }
+
+    return json;
   }
 }

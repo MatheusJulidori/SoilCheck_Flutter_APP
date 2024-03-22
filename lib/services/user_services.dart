@@ -20,7 +20,7 @@ class UserService {
     return res;
   }
 
-  Future<http.Response> getUserById() async {
+  Future<http.Response> getUserBySelfId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final headers = <String, String>{
       'Content-Type': 'application/json',
@@ -32,6 +32,19 @@ class UserService {
 
     final res = await http.get(
       Uri.parse('$baseUrl/user/$userId'),
+      headers: headers,
+    );
+
+    return res;
+  }
+
+  Future<http.Response> getUserNameById(String id) async {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+
+    final res = await http.get(
+      Uri.parse('$baseUrl/user/$id'),
       headers: headers,
     );
 

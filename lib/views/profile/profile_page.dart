@@ -17,7 +17,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     Provider.of<UserProvider>(context, listen: false)
-        .getUserById()
+        .getUserBySelfId()
         .then((user) {
       if (mounted) {
         setState(() {

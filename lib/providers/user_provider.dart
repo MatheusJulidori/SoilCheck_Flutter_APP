@@ -6,8 +6,8 @@ import 'dart:convert';
 class UserProvider extends ChangeNotifier {
   final apiService = UserService();
 
-  Future<User> getUserById() async {
-    final response = await apiService.getUserById();
+  Future<User> getUserBySelfId() async {
+    final response = await apiService.getUserBySelfId();
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -127,6 +127,22 @@ class UserProvider extends ChangeNotifier {
       final user = User.fromJson(data);
       notifyListeners();
       return user;
+    } else {
+      final status = response.statusCode;
+      final message = response.body;
+      final reason = response.reasonPhrase;
+      final error = '$status $reason - $message';
+      throw Exception(error);
+    }
+  }
+
+  Future<String> getUserNameById(String id) async {
+    final response = await apiService.getUserNameById(id);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final name = data['name'];
+      return name;
     } else {
       final status = response.statusCode;
       final message = response.body;

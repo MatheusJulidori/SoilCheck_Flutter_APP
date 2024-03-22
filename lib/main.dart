@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:soilcheck/providers/auth_provider.dart';
+import 'package:soilcheck/providers/checklist_provider.dart';
 import 'package:soilcheck/providers/template_provider.dart';
 import 'package:soilcheck/providers/user_provider.dart';
 import 'package:soilcheck/views/homepage.dart';
@@ -16,7 +17,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ChangeNotifierProvider(create: (_) => UserProvider()),
       ChangeNotifierProvider(create: (_) => TemplateProvider()),
-      //ChangeNotifierProvider(create: (_) => ChecksController())
+      ChangeNotifierProvider(create: (_) => ChecklistProvider())
     ],
     child: const MyApp(),
   ));
