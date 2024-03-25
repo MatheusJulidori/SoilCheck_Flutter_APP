@@ -42,6 +42,27 @@ class TemplateProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<Template>> getTemplatesWithFilter(String filter) async {
+    final response = await apiService.getAllTemplates();
+    List<Template> templates = [];
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      for (var template in data) {
+        if (template['name'].contains(filter)) {
+          templates.add(Template.fromJson(template));
+        }
+      }
+      notifyListeners();
+      return templates;
+    } else {
+      final status = response.statusCode;
+      final message = response.body;
+      final reason = response.reasonPhrase;
+      final error = '$status $reason - $message';
+      throw Exception(error);
+    }
+  }
+
   Future<Template> updateTemplate(Template template, String id) async {
     final response = await apiService.updateTemplate(template, id);
 

@@ -3,6 +3,8 @@ class Checklist {
   final String? idFazenda;
   final String? idPivo;
   final String? idCliente;
+  final String? observacoesGerais;
+  final String? revisao;
   final String idTemplate;
   final String idResponsavel;
   final DateTime dataCriacao;
@@ -15,6 +17,8 @@ class Checklist {
     this.idFazenda,
     this.idPivo,
     this.idCliente,
+    this.observacoesGerais,
+    this.revisao,
     required this.idTemplate,
     required this.idResponsavel,
     required this.dataCriacao,
@@ -33,6 +37,8 @@ class Checklist {
       idResponsavel: json['id_responsavel'],
       dataCriacao: DateTime.parse(json['data_criacao']),
       dataAtualizacao: DateTime.parse(json['data_atualizacao']),
+      observacoesGerais: json['observacoes_gerais'] ?? '',
+      revisao: json['revisao'] ?? '',
       fields: List<Map<String, dynamic>>.from(
           json['fields'].map((field) => Map<String, dynamic>.from(field))),
       id: json['_id'],
@@ -41,14 +47,16 @@ class Checklist {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = {
-      'idRadio': idRadio,
-      'idFazenda': idFazenda,
-      'idPivo': idPivo,
-      'idCliente': idCliente,
-      'idTemplate': idTemplate,
-      'idResponsavel': idResponsavel,
-      'dataCriacao': dataCriacao.toIso8601String(),
-      'dataAtualizacao': dataAtualizacao.toIso8601String(),
+      'id_radio': idRadio,
+      'id_fazenda': idFazenda,
+      'id_pivo': idPivo,
+      'id_cliente': idCliente,
+      'id_template': idTemplate,
+      'id_responsavel': idResponsavel,
+      'observacoes_gerais': observacoesGerais,
+      'revisao': revisao,
+      'data_criacao': dataCriacao.toIso8601String(),
+      'data_atualizacao': dataAtualizacao.toIso8601String(),
       'fields': fields.map((field) => field).toList(),
     };
 
