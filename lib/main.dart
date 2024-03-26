@@ -10,6 +10,9 @@ import 'package:soilcheck/providers/template_provider.dart';
 import 'package:soilcheck/providers/user_provider.dart';
 import 'package:soilcheck/views/homepage.dart';
 import 'package:soilcheck/views/login_view.dart';
+import 'package:soilcheck/views/fazenda/fazenda_list.dart';
+import 'package:soilcheck/views/cliente/cliente_list.dart';
+import 'package:soilcheck/views/pivo/pivo_list.dart';
 import 'package:soilcheck/providers/navigation_provider.dart';
 
 void main() async {
@@ -59,6 +62,9 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginView(),
         '/home': (context) => HomeScreen(),
+        '/fazenda': (context) => const FazendasMain(),
+        '/cliente': (context) => const ClientesMain(),
+        '/pivo': (context) => const PivosMain(),
       },
     );
   }

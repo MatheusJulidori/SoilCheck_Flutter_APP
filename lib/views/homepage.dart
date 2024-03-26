@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:soilcheck/providers/auth_provider.dart';
 import 'package:soilcheck/providers/navigation_provider.dart';
 import 'package:soilcheck/views/checklist/checklist_list.dart';
+import 'package:soilcheck/views/dashboard.dart';
 import 'package:soilcheck/views/profile/profile_page.dart';
 import 'package:soilcheck/views/template/template_list.dart';
 import 'package:soilcheck/views/user/user_list.dart';
@@ -11,6 +12,7 @@ class HomeScreen extends StatelessWidget {
   final List<Widget> _pages = [
     ChecklistMain(),
     TemplatesMain(),
+    const DashboardMain(),
     ProfilePage(),
     AdminPanel(),
   ];
@@ -30,6 +32,10 @@ class HomeScreen extends StatelessWidget {
       const BottomNavigationBarItem(
         icon: Icon(Icons.settings),
         label: 'Templates',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.dataset),
+        label: 'Dados de clientes',
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.person),
