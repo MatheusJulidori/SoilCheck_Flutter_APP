@@ -35,7 +35,7 @@ class HomeScreen extends StatelessWidget {
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.dataset),
-        label: 'Dados de clientes',
+        label: 'Dashboard',
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.person),
