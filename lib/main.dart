@@ -3,6 +3,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:soilcheck/providers/auth_provider.dart';
 import 'package:soilcheck/providers/checklist_provider.dart';
+import 'package:soilcheck/providers/cliente_provider.dart';
+import 'package:soilcheck/providers/fazenda_provider.dart';
+import 'package:soilcheck/providers/pivo_provider.dart';
 import 'package:soilcheck/providers/template_provider.dart';
 import 'package:soilcheck/providers/user_provider.dart';
 import 'package:soilcheck/views/homepage.dart';
@@ -14,10 +17,13 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider(create: (_) => ChecklistProvider()),
+      ChangeNotifierProvider(create: (_) => ClienteProvider()),
+      ChangeNotifierProvider(create: (_) => FazendaProvider()),
       ChangeNotifierProvider(create: (_) => NavigationProvider()),
-      ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => PivoProvider()),
       ChangeNotifierProvider(create: (_) => TemplateProvider()),
-      ChangeNotifierProvider(create: (_) => ChecklistProvider())
+      ChangeNotifierProvider(create: (_) => UserProvider()),
     ],
     child: const MyApp(),
   ));
@@ -32,7 +38,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'SoilCheck',
       theme: Theme.of(context).copyWith(
-     
         primaryColor: const Color(0xff528c4f),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Color(0xff528c4f),
@@ -54,8 +59,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginView(),
         '/home': (context) => HomeScreen(),
-        //'/modelos': (context) => ModeloTesteView(),
-        //'/checks': (context) => const Check()
       },
     );
   }
