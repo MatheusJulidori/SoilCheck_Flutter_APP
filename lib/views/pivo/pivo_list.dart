@@ -10,7 +10,6 @@ class PivoAsyncData {
   PivoAsyncData({required this.fazendaName});
 }
 
-
 class PivosMain extends StatefulWidget {
   const PivosMain({super.key});
 
@@ -22,18 +21,22 @@ class _PivosMainState extends State<PivosMain> {
   List<Pivo>? pivoList;
   List<Pivo>? filteredPivoList;
   final TextEditingController _searchController = TextEditingController();
+  Map<String, String> fazendaNameMap = {};
 
-  void _fetchAllPivos() {
-    Provider.of<PivoProvider>(context, listen: false)
-        .getAllPivos()
-        .then((pivo) {
-      if (mounted) {
-        setState(() {
-          pivoList = pivo;
-          filteredPivoList = pivo;
-        });
-      }
-    });
+  void _fetchAllPivos() async {
+    var pivos =
+        await Provider.of<PivoProvider>(context, listen: false).getAllPivos();
+    var fazendas = await Provider.of<FazendaProvider>(context, listen: false)
+        .getAllFazendas();
+
+    fazendaNameMap = {for (var f in fazendas) f.id!: f.name};
+
+    if (mounted) {
+      setState(() {
+        pivoList = pivos;
+        filteredPivoList = pivos;
+      });
+    }
   }
 
   @override
@@ -51,9 +54,13 @@ class _PivosMainState extends State<PivosMain> {
 
   void _filterPivos() {
     String query = _searchController.text.toLowerCase();
+
     setState(() {
       filteredPivoList = pivoList!.where((pivo) {
-        return pivo.name.toLowerCase().contains(query);
+        bool nameMatch = pivo.name.toLowerCase().contains(query);
+        bool clienteNameMatch = fazendaNameMap[pivo.idFazenda]?.toLowerCase().contains(query) ?? false;
+
+        return nameMatch || clienteNameMatch;
       }).toList();
     });
   }
@@ -181,8 +188,7 @@ class _PivosMainState extends State<PivosMain> {
                                 final pivo = filteredPivoList![index];
 
                                 return FutureBuilder<PivoAsyncData>(
-                                    future:
-                                        _getPivoAsyncData(pivo.idFazenda),
+                                    future: _getPivoAsyncData(pivo.idFazenda),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {
@@ -229,8 +235,7 @@ class _PivosMainState extends State<PivosMain> {
                                                             .spaceBetween,
                                                     children: [
                                                       Expanded(
-                                                        child: Text(
-                                                            pivo.name,
+                                                        child: Text(pivo.name,
                                                             style:
                                                                 const TextStyle(
                                                               fontSize: 20.0,

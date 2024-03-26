@@ -21,18 +21,20 @@ class _FazendasMainState extends State<FazendasMain> {
   List<Fazenda>? fazendaList;
   List<Fazenda>? filteredFazendaList;
   final TextEditingController _searchController = TextEditingController();
+  Map<String, String> clienteNameMap = {};
 
-  void _fetchAllFazendas() {
-    Provider.of<FazendaProvider>(context, listen: false)
-        .getAllFazendas()
-        .then((fazenda) {
-      if (mounted) {
-        setState(() {
-          fazendaList = fazenda;
-          filteredFazendaList = fazenda;
-        });
-      }
-    });
+  void _fetchAllFazendas() async {
+    var fazendas = await Provider.of<FazendaProvider>(context, listen: false).getAllFazendas();
+    var clientes = await Provider.of<ClienteProvider>(context, listen: false).getAllClientes();
+
+    clienteNameMap = {for (var c in clientes) c.id!: c.name};
+
+    if (mounted) {
+      setState(() {
+        fazendaList = fazendas;
+        filteredFazendaList = fazendas;
+      });
+    }
   }
 
   @override
@@ -41,7 +43,7 @@ class _FazendasMainState extends State<FazendasMain> {
     _fetchAllFazendas();
     _searchController.addListener(_filterFazendas);
   }
-
+  
   @override
   void dispose() {
     _searchController.dispose();
@@ -50,9 +52,13 @@ class _FazendasMainState extends State<FazendasMain> {
 
   void _filterFazendas() {
     String query = _searchController.text.toLowerCase();
+
     setState(() {
       filteredFazendaList = fazendaList!.where((fazenda) {
-        return fazenda.name.toLowerCase().contains(query);
+        bool nameMatch = fazenda.name.toLowerCase().contains(query);
+        bool clienteNameMatch = clienteNameMap[fazenda.idCliente]?.toLowerCase().contains(query) ?? false;
+
+        return nameMatch || clienteNameMatch;
       }).toList();
     });
   }
