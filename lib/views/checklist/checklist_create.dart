@@ -284,6 +284,7 @@ class _CreateChecklistState extends State<CreateChecklist> {
                     Checklist newChecklist = Checklist(
                       idTemplate: _selectedTemplate!.id!,
                       idFazenda: _selectedFazenda!.id!,
+                      idCliente: _selectedCliente!.id!,
                       idPivo: _selectedPivo!.id!,
                       idRadio: _idRadioController.text,
                       observacoesGerais: _observacoesGeraisController.text,

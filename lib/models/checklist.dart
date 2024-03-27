@@ -1,8 +1,8 @@
 class Checklist {
   final String idRadio;
-  final String? idFazenda;
-  final String? idPivo;
-  final String? idCliente;
+  final String idFazenda;
+  final String idPivo;
+  final String idCliente;
   final String? observacoesGerais;
   final String? revisao;
   final String idTemplate;
@@ -14,9 +14,9 @@ class Checklist {
 
   Checklist({
     required this.idRadio,
-    this.idFazenda,
-    this.idPivo,
-    this.idCliente,
+    required this.idFazenda,
+    required this.idPivo,
+    required this.idCliente,
     this.observacoesGerais,
     this.revisao,
     required this.idTemplate,

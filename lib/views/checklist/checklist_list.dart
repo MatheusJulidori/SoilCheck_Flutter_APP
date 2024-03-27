@@ -2,16 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:soilcheck/models/checklist.dart';
+import 'package:soilcheck/models/cliente.dart';
+import 'package:soilcheck/models/fazenda.dart';
+import 'package:soilcheck/models/pivo.dart';
 import 'package:soilcheck/providers/checklist_provider.dart';
+import 'package:soilcheck/providers/cliente_provider.dart';
+import 'package:soilcheck/providers/fazenda_provider.dart';
+import 'package:soilcheck/providers/pivo_provider.dart';
 import 'package:soilcheck/providers/user_provider.dart';
 import 'package:soilcheck/views/checklist/checklist_create.dart';
 import 'package:soilcheck/views/checklist/checklist_edit.dart';
 
 class ChecklistAsyncData {
   final String responsavelName;
-  //add more data here and then ,required this.data on the return
+  final String clienteName;
+  final String fazendaName;
+  final String pivoName;
 
-  ChecklistAsyncData({required this.responsavelName});
+  ChecklistAsyncData(
+      {required this.responsavelName,
+      required this.clienteName,
+      required this.fazendaName,
+      required this.pivoName});
 }
 
 class ChecklistMain extends StatefulWidget {
@@ -64,10 +76,35 @@ class _ChecklistMainState extends State<ChecklistMain> {
         .getUserNameById(idResponsavel);
   }
 
-  Future<ChecklistAsyncData> _getChecklistAsyncData(
-      String idResponsavel) async {
+  Future<String> _getFazendaName(String idFazenda) async {
+    Fazenda fazenda = await Provider.of<FazendaProvider>(context, listen: false)
+        .getFazendaById(idFazenda);
+    return fazenda.name;
+  }
+
+  Future<String> _getClienteName(String idCliente) async {
+    Cliente cliente = await Provider.of<ClienteProvider>(context, listen: false)
+        .getClienteById(idCliente);
+    return cliente.name;
+  }
+
+  Future<String> _getPivoName(String idPivo) async {
+    Pivo pivo = await Provider.of<PivoProvider>(context, listen: false)
+        .getPivoById(idPivo);
+    return pivo.name;
+  }
+
+  Future<ChecklistAsyncData> _getChecklistAsyncData(String idResponsavel,
+      String idCliente, String idFazenda, String idPivo) async {
     final String responsavelName = await _getResponsavelName(idResponsavel);
-    return ChecklistAsyncData(responsavelName: responsavelName);
+    final String clienteName = await _getClienteName(idCliente);
+    final String fazendaName = await _getFazendaName(idFazenda);
+    final String pivoName = await _getPivoName(idPivo);
+    return ChecklistAsyncData(
+        responsavelName: responsavelName,
+        clienteName: clienteName,
+        fazendaName: fazendaName,
+        pivoName: pivoName);
   }
 
   @override
@@ -153,7 +190,10 @@ class _ChecklistMainState extends State<ChecklistMain> {
 
                                 return FutureBuilder<ChecklistAsyncData>(
                                     future: _getChecklistAsyncData(
-                                        checklist.idResponsavel),
+                                        checklist.idResponsavel,
+                                        checklist.idCliente,
+                                        checklist.idFazenda,
+                                        checklist.idPivo),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {
@@ -232,34 +272,30 @@ class _ChecklistMainState extends State<ChecklistMain> {
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
-                                                        if (checklist
-                                                                    .idFazenda !=
-                                                                null &&
-                                                            checklist
-                                                                    .idFazenda !=
-                                                                '')
-                                                          Text(
-                                                              'Fazenda: ${checklist.idFazenda}',
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 16.0,
-                                                                color: Colors
-                                                                    .white,
-                                                              )),
-                                                        if (checklist
-                                                                    .idCliente !=
-                                                                null &&
-                                                            checklist
-                                                                    .idCliente !=
-                                                                '')
-                                                          Text(
-                                                              'Cliente: ${checklist.idCliente}',
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 16.0,
-                                                                color: Colors
-                                                                    .white,
-                                                              )),
+                                                        Text(
+                                                            'Fazenda: ${snapshot.data!.fazendaName}',
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 16.0,
+                                                              color:
+                                                                  Colors.white,
+                                                            )),
+                                                        Text(
+                                                            'Pivo: ${snapshot.data!.pivoName}',
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 16.0,
+                                                              color:
+                                                                  Colors.white,
+                                                            )),
+                                                        Text(
+                                                            'Cliente: ${snapshot.data!.clienteName}',
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 16.0,
+                                                              color:
+                                                                  Colors.white,
+                                                            )),
                                                         Text(
                                                             'Responsável: ${snapshot.data!.responsavelName}',
                                                             style:
