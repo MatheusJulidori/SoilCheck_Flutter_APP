@@ -15,12 +15,14 @@ import 'package:soilcheck/providers/template_provider.dart';
 class ChecklistField {
   String fieldName;
   bool isRequired;
+  String? description;
   String? observation;
   bool isOk;
 
   ChecklistField(
       {required this.fieldName,
       required this.isRequired,
+      this.description,
       this.observation,
       required this.isOk});
 }
@@ -74,6 +76,7 @@ class _CreateChecklistState extends State<CreateChecklist> {
         var checklistField = ChecklistField(
           fieldName: fieldMap['fieldName'] as String,
           isRequired: fieldMap['isRequired'] as bool,
+          description: fieldMap['description'] ?? '',
           observation: '',
           isOk: false,
         );
@@ -276,6 +279,7 @@ class _CreateChecklistState extends State<CreateChecklist> {
                         .map((field) => {
                               'fieldName': field.fieldName,
                               'isRequired': field.isRequired,
+                              'description': field.description,
                               'observation': field.observation,
                               'isOk': field.isOk,
                             })
@@ -354,6 +358,7 @@ class _CreateChecklistState extends State<CreateChecklist> {
                                     value: false, child: Text('Não Ok')),
                               ],
                             ),
+                            if(field.description!= null && field.description!='')Text('${field.description}'),
                             TextField(
                               onChanged: (value) {
                                 field.observation = value;

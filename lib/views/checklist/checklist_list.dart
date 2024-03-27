@@ -11,7 +11,7 @@ import 'package:soilcheck/providers/fazenda_provider.dart';
 import 'package:soilcheck/providers/pivo_provider.dart';
 import 'package:soilcheck/providers/user_provider.dart';
 import 'package:soilcheck/views/checklist/checklist_create.dart';
-import 'package:soilcheck/views/checklist/checklist_edit.dart';
+import 'package:soilcheck/views/checklist/checklist_detail.dart';
 
 class ChecklistAsyncData {
   final String responsavelName;
@@ -35,18 +35,31 @@ class _ChecklistMainState extends State<ChecklistMain> {
   List<Checklist>? checklistList;
   List<Checklist>? filteredChecklistList;
   final TextEditingController _searchController = TextEditingController();
+  Map<String, String> clienteNameMap = {};
+  Map<String, String> fazendaNameMap = {};
+  Map<String, String> responsavelNameMap = {};
 
-  void _fetchAllChecklists() {
-    Provider.of<ChecklistProvider>(context, listen: false)
-        .getAllChecklists()
-        .then((checklist) {
-      if (mounted) {
-        setState(() {
-          checklistList = checklist;
-          filteredChecklistList = checklist;
-        });
-      }
-    });
+  void _fetchAllChecklists() async {
+    var fazendas = await Provider.of<FazendaProvider>(context, listen: false)
+        .getAllFazendas();
+    var clientes = await Provider.of<ClienteProvider>(context, listen: false)
+        .getAllClientes();
+    var responsaveis =
+        await Provider.of<UserProvider>(context, listen: false).getAllUsers();
+    var checklists =
+        await Provider.of<ChecklistProvider>(context, listen: false)
+            .getAllChecklists();
+
+    clienteNameMap = {for (var c in clientes) c.id!: c.name};
+    fazendaNameMap = {for (var f in fazendas) f.id!: f.name};
+    responsavelNameMap = {for (var r in responsaveis) r.id!: r.name};
+
+    if (mounted) {
+      setState(() {
+        checklistList = checklists;
+        filteredChecklistList = checklists;
+      });
+    }
   }
 
   @override
@@ -64,9 +77,32 @@ class _ChecklistMainState extends State<ChecklistMain> {
 
   void _filterChecklists() {
     String query = _searchController.text.toLowerCase();
+
     setState(() {
       filteredChecklistList = checklistList!.where((checklist) {
-        return checklist.idRadio.toLowerCase().contains(query);
+        bool nameMatch = checklist.idRadio.toLowerCase().contains(query);
+        bool clienteNameMatch = clienteNameMap[checklist.idCliente]
+                ?.toLowerCase()
+                .contains(query) ??
+            false;
+        bool fazendaNameMatch = fazendaNameMap[checklist.idFazenda]
+                ?.toLowerCase()
+                .contains(query) ??
+            false;
+        bool responsavelNameMatch = responsavelNameMap[checklist.idResponsavel]
+                ?.toLowerCase()
+                .contains(query) ??
+            false;
+
+        String formattedDate =
+            "${checklist.dataCriacao.toLocal().day}/${checklist.dataCriacao.toLocal().month}/${checklist.dataCriacao.toLocal().year}";
+        bool dateMatch = formattedDate.contains(query);
+
+        return nameMatch ||
+            clienteNameMatch ||
+            fazendaNameMatch ||
+            responsavelNameMatch ||
+            dateMatch;
       }).toList();
     });
   }
@@ -217,7 +253,7 @@ class _ChecklistMainState extends State<ChecklistMain> {
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: (context) =>
-                                                        EditChecklist(
+                                                        ViewChecklistPage(
                                                             checklist:
                                                                 checklist)),
                                               );

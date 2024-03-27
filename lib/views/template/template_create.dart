@@ -7,9 +7,10 @@ import 'package:soilcheck/providers/template_provider.dart';
 
 class TemplateField {
   String fieldName;
+  String? description;
   bool isRequired;
 
-  TemplateField({required this.fieldName, required this.isRequired});
+  TemplateField({required this.fieldName, required this.isRequired, this.description});
 }
 
 class CreateTemplate extends StatefulWidget {
@@ -37,6 +38,8 @@ class _CreateTemplateState extends State<CreateTemplate> {
 AlertDialog _addFieldDialog({TemplateField? editingField}) {
   final TextEditingController _fieldNameController = TextEditingController(
       text: editingField != null ? editingField.fieldName : '');
+  final TextEditingController _descriptionController = TextEditingController(
+      text: editingField != null ? editingField.description : '');
   bool _isRequired = editingField?.isRequired ?? false;
 
   return AlertDialog(
@@ -49,6 +52,11 @@ AlertDialog _addFieldDialog({TemplateField? editingField}) {
               TextField(
                 controller: _fieldNameController,
                 decoration: const InputDecoration(hintText: "Nome do campo"),
+              ),
+              const SizedBox(height: 16.0),
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(hintText: "Descrição"),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -86,9 +94,10 @@ AlertDialog _addFieldDialog({TemplateField? editingField}) {
           } else {
             if (editingField == null) {
               _fields.add(TemplateField(
-                  fieldName: _fieldNameController.text, isRequired: _isRequired));
+                  fieldName: _fieldNameController.text, isRequired: _isRequired, description: _descriptionController.text));
             } else {
               editingField.fieldName = _fieldNameController.text;
+              editingField.description = _descriptionController.text;
               editingField.isRequired = _isRequired;
             }
             Navigator.of(context).pop();
@@ -139,6 +148,7 @@ AlertDialog _addFieldDialog({TemplateField? editingField}) {
                         final fieldsFormatted = _fields
                             .map((field) => {
                                   'fieldName': field.fieldName,
+                                  'description': field.description,
                                   'isRequired': field.isRequired,
                                 })
                             .toList();
@@ -188,7 +198,13 @@ AlertDialog _addFieldDialog({TemplateField? editingField}) {
                       child: ListTile(
                         title: Text(field.fieldName),
                         subtitle:
-                            Text(field.isRequired ? 'Obrigatório' : 'Opcional'),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(field.isRequired ? 'Obrigatório' : 'Opcional'),
+                                if (field.description != null) Text('Descrição: ${field.description}'),
+                              ],
+                            ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -220,13 +236,14 @@ AlertDialog _addFieldDialog({TemplateField? editingField}) {
                                         },
                                       ),
                                       TextButton(
-                                        child: const Text('Remover'),
+                                        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
                                         onPressed: () {
                                           setState(() {
                                             _fields.removeAt(index);
                                           });
                                           Navigator.of(context).pop();
                                         },
+                                        child: const Text('Remover'),
                                       ),
                                     ],
                                   ),

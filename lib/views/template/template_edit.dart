@@ -7,9 +7,11 @@ import 'package:soilcheck/providers/template_provider.dart';
 
 class TemplateField {
   String fieldName;
+  String? description;
   bool isRequired;
 
-  TemplateField({required this.fieldName, required this.isRequired});
+  TemplateField(
+      {required this.fieldName, required this.isRequired, this.description});
 }
 
 class EditTemplate extends StatefulWidget {
@@ -31,7 +33,9 @@ class _EditTemplateState extends State<EditTemplate> {
     _templateNameController.text = widget.template.name;
     _fields = widget.template.fields.map((field) {
       return TemplateField(
-          fieldName: field['fieldName'], isRequired: field['isRequired']);
+          fieldName: field['fieldName'],
+          isRequired: field['isRequired'],
+          description: field['description']);
     }).toList();
   }
 
@@ -51,6 +55,8 @@ class _EditTemplateState extends State<EditTemplate> {
   AlertDialog _addFieldDialog({TemplateField? editingField}) {
     final TextEditingController _fieldNameController = TextEditingController(
         text: editingField != null ? editingField.fieldName : '');
+    final TextEditingController _descriptionController = TextEditingController(
+        text: editingField != null ? editingField.description : '');
     bool _isRequired = editingField?.isRequired ?? false;
 
     return AlertDialog(
@@ -63,6 +69,11 @@ class _EditTemplateState extends State<EditTemplate> {
                 TextField(
                   controller: _fieldNameController,
                   decoration: const InputDecoration(hintText: "Nome do campo"),
+                ),
+                const SizedBox(height: 16.0),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(hintText: "Descrição"),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,9 +112,11 @@ class _EditTemplateState extends State<EditTemplate> {
               if (editingField == null) {
                 _fields.add(TemplateField(
                     fieldName: _fieldNameController.text,
+                    description: _descriptionController.text,
                     isRequired: _isRequired));
               } else {
                 editingField.fieldName = _fieldNameController.text;
+                editingField.description = _descriptionController.text;
                 editingField.isRequired = _isRequired;
               }
               Navigator.of(context).pop();
@@ -153,6 +166,7 @@ class _EditTemplateState extends State<EditTemplate> {
                         final fieldsFormatted = _fields
                             .map((field) => {
                                   'fieldName': field.fieldName,
+                                  'description': field.description,
                                   'isRequired': field.isRequired,
                                 })
                             .toList();
@@ -205,7 +219,13 @@ class _EditTemplateState extends State<EditTemplate> {
                       child: ListTile(
                         title: Text(field.fieldName),
                         subtitle:
-                            Text(field.isRequired ? 'Obrigatório' : 'Opcional'),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(field.isRequired ? 'Obrigatório' : 'Opcional'),
+                                if (field.description != null) Text('Descrição: ${field.description}'),
+                              ],
+                            ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -237,13 +257,14 @@ class _EditTemplateState extends State<EditTemplate> {
                                         },
                                       ),
                                       TextButton(
-                                        child: const Text('Remover'),
+                                        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
                                         onPressed: () {
                                           setState(() {
                                             _fields.removeAt(index);
                                           });
                                           Navigator.of(context).pop();
                                         },
+                                        child: const Text('Remover'),
                                       ),
                                     ],
                                   ),
