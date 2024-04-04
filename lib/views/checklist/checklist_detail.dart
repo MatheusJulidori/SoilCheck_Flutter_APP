@@ -132,6 +132,7 @@ class _ViewChecklistPageState extends State<ViewChecklistPage> {
                           Text(
                               'Observações Gerais: ${widget.checklist.observacoesGerais}',
                               style: const TextStyle(fontSize: 16)),
+                          const SizedBox(height: 8),
                           Text('Revisão: ${widget.checklist.revisao}',
                               style: const TextStyle(fontSize: 16)),
                         ],
