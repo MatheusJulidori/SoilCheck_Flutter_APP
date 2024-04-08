@@ -44,7 +44,7 @@ class _CreateChecklistState extends State<CreateChecklist> {
 
   Cliente? _selectedCliente;
   Iterable<Cliente>? _filteredClientesCompletions;
-  final String _clienteQuery = '';
+  String _clienteQuery = '';
 
   Fazenda? _selectedFazenda;
   List<Fazenda> fazendaList = [];
@@ -173,7 +173,7 @@ class _CreateChecklistState extends State<CreateChecklist> {
               ),
               Autocomplete<Cliente>(
                 optionsBuilder: (TextEditingValue textEditingValue) async {
-                  _templateQuery = textEditingValue.text;
+                  _clienteQuery = textEditingValue.text;
                   final Iterable<Cliente> options = (await context
                       .read<ClienteProvider>()
                       .getClientesWithFilter(_clienteQuery));
