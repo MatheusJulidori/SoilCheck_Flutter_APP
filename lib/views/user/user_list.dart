@@ -41,132 +41,140 @@ class _AdminPanelState extends State<AdminPanel> {
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    expandedHeight: imageHeight,
-                    floating: false,
-                    pinned: true,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Image.asset(
-                        'assets/images/adminPanelBG.png',
-                        fit: BoxFit.cover,
+            : RefreshIndicator(
+                onRefresh: () async {
+                  _fetchAllUsers();
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      expandedHeight: imageHeight,
+                      floating: false,
+                      pinned: true,
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Image.asset(
+                          'assets/images/adminPanelBG.png',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  SliverFillRemaining(
-                    child: Container(
-                      color: const Color(0xFFf1f1f1),
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Usuários',
-                                style: TextStyle(
-                                  fontSize: 24.0,
-                                  fontWeight: FontWeight.bold,
+                    SliverFillRemaining(
+                      child: Container(
+                        color: const Color(0xFFf1f1f1),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Usuários',
+                                  style: TextStyle(
+                                    fontSize: 24.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              ElevatedButton.icon(
-                                icon: const Icon(Icons.add),
-                                onPressed: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) {
-                                      return CreateUser();
-                                    }),
-                                  );
-                                  if (result != null) {
-                                    _fetchAllUsers();
-                                  }
-                                },
-                                label: const Text('Adicionar'),
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 16.0),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: userList!.length,
-                              itemBuilder: (context, index) {
-                                final user = userList![index];
-                                return Card(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8.0),
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF51A468),
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(10.0),
-                                            topRight: Radius.circular(10.0),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              user.name,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.edit,
-                                                  color: Colors.white),
-                                              onPressed: () {
-                                                _openEditUserDialog(user);
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.all(8.0),
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF258F42),
-                                          borderRadius: BorderRadius.only(
-                                            bottomLeft: Radius.circular(10.0),
-                                            bottomRight: Radius.circular(10.0),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Admin: ${user.isAdmin ? "Yes" : "No"}',
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                            Text(
-                                              'Active: ${user.isActive ? "Yes" : "No"}',
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
+                                ElevatedButton.icon(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () async {
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) {
+                                        return CreateUser();
+                                      }),
+                                    );
+                                    if (result != null) {
+                                      setState(() {
+                                        _fetchAllUsers;
+                                      });
+                                    }
+                                  },
+                                  label: const Text('Adicionar'),
+                                )
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 16.0),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: userList!.length,
+                                itemBuilder: (context, index) {
+                                  final user = userList![index];
+                                  return Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8.0),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFF51A468),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(10.0),
+                                              topRight: Radius.circular(10.0),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                user.name,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.edit,
+                                                    color: Colors.white),
+                                                onPressed: () {
+                                                  _openEditUserDialog(user);
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.all(8.0),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFF258F42),
+                                            borderRadius: BorderRadius.only(
+                                              bottomLeft: Radius.circular(10.0),
+                                              bottomRight:
+                                                  Radius.circular(10.0),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'Admin: ${user.isAdmin ? "Yes" : "No"}',
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              Text(
+                                                'Active: ${user.isActive ? "Yes" : "No"}',
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
       ),
     );

@@ -16,6 +16,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
+    _fetchData();
+    super.initState();
+  }
+
+  void _fetchData() {
     Provider.of<UserProvider>(context, listen: false)
         .getUserBySelfId()
         .then((user) {
@@ -34,7 +39,6 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       }
     });
-    super.initState();
   }
 
   @override
@@ -46,77 +50,82 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    expandedHeight: imageHeight,
-                    floating: false,
-                    pinned: true,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Image.asset(
-                        'assets/images/profilePageBG.png',
-                        fit: BoxFit.cover,
+            : RefreshIndicator(
+                onRefresh: () async {
+                  _fetchData();
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      expandedHeight: imageHeight,
+                      floating: false,
+                      pinned: true,
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Image.asset(
+                          'assets/images/profilePageBG.png',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  SliverFillRemaining(
-                    child: Container(
-                      color: const Color(0xFFf1f1f1),
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16.0),
-                          Text(
-                            userData?.name ?? '',
-                            style: const TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromARGB(255, 46, 57, 31)),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16.0),
-                          Text(
-                            textAlign: TextAlign.start,
-                            "${userChecks ?? ''} ${userChecks == 1 ? ' verificação realizada' : ' verificações realizadas'}",
-                            style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromARGB(255, 46, 57, 31)),
-                          ),
-                          const SizedBox(height: 32.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton.icon(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  _openNameChangeDialog();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Color.fromARGB(255, 130, 222, 250),
+                    SliverFillRemaining(
+                      child: Container(
+                        color: const Color(0xFFf1f1f1),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16.0),
+                            Text(
+                              userData?.name ?? '',
+                              style: const TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 46, 57, 31)),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16.0),
+                            Text(
+                              textAlign: TextAlign.start,
+                              "${userChecks ?? ''} ${userChecks == 1 ? ' verificação realizada' : ' verificações realizadas'}",
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 46, 57, 31)),
+                            ),
+                            const SizedBox(height: 32.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton.icon(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    _openNameChangeDialog();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Color.fromARGB(255, 130, 222, 250),
+                                  ),
+                                  label: const Text('Editar nome'),
                                 ),
-                                label: const Text('Editar nome'),
-                              ),
-                              const SizedBox(width: 16.0),
-                              ElevatedButton.icon(
-                                icon: const Icon(Icons.lock_person),
-                                onPressed: () {
-                                  _openPasswordChangeDialog();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Color.fromARGB(255, 130, 222, 255),
+                                const SizedBox(width: 16.0),
+                                ElevatedButton.icon(
+                                  icon: const Icon(Icons.lock_person),
+                                  onPressed: () {
+                                    _openPasswordChangeDialog();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Color.fromARGB(255, 130, 222, 255),
+                                  ),
+                                  label: const Text('Trocar senha'),
                                 ),
-                                label: const Text('Trocar senha'),
-                              ),
-                            ],
-                          )
-                        ],
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
       ),
     );
