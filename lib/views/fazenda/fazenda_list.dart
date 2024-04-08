@@ -21,11 +21,18 @@ class _FazendasMainState extends State<FazendasMain> {
   List<Fazenda>? fazendaList;
   List<Fazenda>? filteredFazendaList;
   final TextEditingController _searchController = TextEditingController();
+
   Map<String, String> clienteNameMap = {};
+  List<Cliente> clienteList = [];
+  Cliente? selectedClient;
+  Iterable<Cliente>? _filteredClientesCompletions;
+  String _clienteQuery = '';
 
   void _fetchAllFazendas() async {
-    var fazendas = await Provider.of<FazendaProvider>(context, listen: false).getAllFazendas();
-    var clientes = await Provider.of<ClienteProvider>(context, listen: false).getAllClientes();
+    var fazendas = await Provider.of<FazendaProvider>(context, listen: false)
+        .getAllFazendas();
+    var clientes = await Provider.of<ClienteProvider>(context, listen: false)
+        .getAllClientes();
 
     clienteNameMap = {for (var c in clientes) c.id!: c.name};
 
@@ -33,6 +40,7 @@ class _FazendasMainState extends State<FazendasMain> {
       setState(() {
         fazendaList = fazendas;
         filteredFazendaList = fazendas;
+        clienteList = clientes;
       });
     }
   }
@@ -43,7 +51,7 @@ class _FazendasMainState extends State<FazendasMain> {
     _fetchAllFazendas();
     _searchController.addListener(_filterFazendas);
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -56,7 +64,9 @@ class _FazendasMainState extends State<FazendasMain> {
     setState(() {
       filteredFazendaList = fazendaList!.where((fazenda) {
         bool nameMatch = fazenda.name.toLowerCase().contains(query);
-        bool clienteNameMatch = clienteNameMap[fazenda.idCliente]?.toLowerCase().contains(query) ?? false;
+        bool clienteNameMatch =
+            clienteNameMap[fazenda.idCliente]?.toLowerCase().contains(query) ??
+                false;
 
         return nameMatch || clienteNameMatch;
       }).toList();
@@ -84,9 +94,46 @@ class _FazendasMainState extends State<FazendasMain> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(fazenda == null ? 'Adicionar Fazenda' : 'Editar Fazenda'),
-          content: TextField(
-            controller: nameController,
-            decoration: const InputDecoration(hintText: "Nome"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(hintText: "Nome"),
+              ),
+              const SizedBox(height: 20),
+              Autocomplete<Cliente>(
+                optionsBuilder: (TextEditingValue textEditingValue) async {
+                  _clienteQuery = textEditingValue.text;
+                  final Iterable<Cliente> options = (await context
+                      .read<ClienteProvider>()
+                      .getClientesWithFilter(_clienteQuery));
+                  if (_clienteQuery != textEditingValue.text) {
+                    if (_filteredClientesCompletions != null) {
+                      return _filteredClientesCompletions!;
+                    }
+                  }
+                  _filteredClientesCompletions = options;
+                  return options;
+                },
+                displayStringForOption: (Cliente option) => option.name,
+                onSelected: (Cliente selection) {
+                  setState(() {
+                    selectedClient = selection;
+                  });
+                },
+                fieldViewBuilder:
+                    (context, controller, focusNode, onFieldSubmitted) {
+                  return TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      hintText: "Selecione o cliente",
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           actions: <Widget>[
             TextButton(
@@ -97,13 +144,32 @@ class _FazendasMainState extends State<FazendasMain> {
             ),
             TextButton(
               child: const Text('Salvar'),
-              onPressed: () {
-                if (fazenda == null) {
-                  // Implement logic to create a new client
+              onPressed: () async {
+                if (selectedClient == null || nameController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Por favor, preencha todos os dados')),
+                  );
+                } else if(fazenda == null && selectedClient != null) {
+                  final newFazenda = Fazenda(
+                    name: nameController.text,
+                    idCliente: selectedClient!.id!,
+                  );
+                  await Provider.of<FazendaProvider>(context, listen: false)
+                      .createFazenda(newFazenda);
                 } else {
-                  // Implement logic to update the existing client
+                  final updatedFazenda = Fazenda(
+                    id: fazenda!.id,
+                    name: nameController.text,
+                    idCliente: selectedClient!.id!,
+                  );
+                  await Provider.of<FazendaProvider>(context, listen: false)
+                      .updateFazenda(updatedFazenda, fazenda.id!);
                 }
                 Navigator.of(context).pop();
+                setState(() {
+                  _fetchAllFazendas();
+                });
               },
             ),
           ],
@@ -121,177 +187,182 @@ class _FazendasMainState extends State<FazendasMain> {
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    expandedHeight: imageHeight,
-                    floating: false,
-                    pinned: true,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Image.asset(
-                        'assets/images/FazendasBG.png',
-                        fit: BoxFit.cover,
+            : RefreshIndicator(
+                onRefresh: () async {
+                  _fetchAllFazendas();
+                },
+              child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      expandedHeight: imageHeight,
+                      floating: false,
+                      pinned: true,
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Image.asset(
+                          'assets/images/FazendasBG.png',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  SliverFillRemaining(
-                    child: Container(
-                      color: const Color(0xFFf1f1f1),
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ElevatedButton.icon(
-                                icon: const Icon(Icons.add),
-                                onPressed: () async {
-                                  _showEditOrCreateDialog().then((value) {
-                                    setState(() {
-                                      _fetchAllFazendas();
+                    SliverFillRemaining(
+                      child: Container(
+                        color: const Color(0xFFf1f1f1),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                ElevatedButton.icon(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () async {
+                                    _showEditOrCreateDialog().then((value) {
+                                      setState(() {
+                                        _fetchAllFazendas();
+                                      });
                                     });
-                                  });
-                                },
-                                label: const Text('Criar fazenda'),
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 8.0),
-                          TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              labelText: 'Filtrar Fazendas',
-                              suffixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade400),
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Theme.of(context).primaryColor),
-                                borderRadius: BorderRadius.circular(30.0),
+                                  },
+                                  label: const Text('Criar fazenda'),
+                                )
+                              ],
+                            ),
+                            const SizedBox(height: 8.0),
+                            TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                labelText: 'Filtrar Fazendas',
+                                suffixIcon: const Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade400),
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 16.0),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: filteredFazendaList!.length,
-                              itemBuilder: (context, index) {
-                                final fazenda = filteredFazendaList![index];
-
-                                return FutureBuilder<FazendaAsyncData>(
-                                    future:
-                                        _getFazendaAsyncData(fazenda.idCliente),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Center(
-                                            child: CircularProgressIndicator());
-                                      } else if (snapshot.hasError) {
-                                        return Center(
-                                            child: Text(
-                                                'Erro: ${snapshot.error}'));
-                                      } else {
-                                        return Card(
-                                          margin: const EdgeInsets.only(
-                                              bottom: 16.0),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                          ),
-                                          child: InkWell(
-                                            onTap: () {
-                                              _showEditOrCreateDialog(
-                                                      fazenda: fazenda)
-                                                  .then((value) {
-                                                setState(() {
-                                                  _fetchAllFazendas();
+                            const SizedBox(height: 16.0),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: filteredFazendaList!.length,
+                                itemBuilder: (context, index) {
+                                  final fazenda = filteredFazendaList![index];
+              
+                                  return FutureBuilder<FazendaAsyncData>(
+                                      future:
+                                          _getFazendaAsyncData(fazenda.idCliente),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const Center(
+                                              child: CircularProgressIndicator());
+                                        } else if (snapshot.hasError) {
+                                          return Center(
+                                              child: Text(
+                                                  'Erro: ${snapshot.error}'));
+                                        } else {
+                                          return Card(
+                                            margin: const EdgeInsets.only(
+                                                bottom: 16.0),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            child: InkWell(
+                                              onTap: () {
+                                                _showEditOrCreateDialog(
+                                                        fazenda: fazenda)
+                                                    .then((value) {
+                                                  setState(() {
+                                                    _fetchAllFazendas();
+                                                  });
                                                 });
-                                              });
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.all(16.0),
-                                              decoration: const BoxDecoration(
-                                                color: Color(0xFF258F42),
-                                                borderRadius: BorderRadius.all(
-                                                  Radius.circular(10.0),
-                                                ),
-                                              ),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                            fazenda.name,
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 20.0,
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Icon(Icons.edit,
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .primaryColor),
-                                                    ],
+                                              },
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                decoration: const BoxDecoration(
+                                                  color: Color(0xFF258F42),
+                                                  borderRadius: BorderRadius.all(
+                                                    Radius.circular(10.0),
                                                   ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 8.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
                                                       children: [
-                                                        Text(
-                                                            'Cliente: ${snapshot.data!.clienteName}',
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 16.0,
-                                                              color:
-                                                                  Colors.white,
-                                                            )),
+                                                        Expanded(
+                                                          child: Text(
+                                                              fazenda.name,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 20.0,
+                                                                color:
+                                                                    Colors.white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis),
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        Icon(Icons.edit,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor),
                                                       ],
                                                     ),
-                                                  )
-                                                ],
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 8.0),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                              'Cliente: ${snapshot.data!.clienteName}',
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 16.0,
+                                                                color:
+                                                                    Colors.white,
+                                                              )),
+                                                        ],
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      }
-                                    });
-                              },
+                                          );
+                                        }
+                                      });
+                                },
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+            ),
       ),
     );
   }

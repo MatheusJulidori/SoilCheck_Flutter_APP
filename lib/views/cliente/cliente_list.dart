@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:soilcheck/models/cliente.dart';
 import 'package:soilcheck/providers/cliente_provider.dart';
 
-
 class ClientesMain extends StatefulWidget {
   const ClientesMain({super.key});
 
@@ -74,13 +73,28 @@ class _ClientesMainState extends State<ClientesMain> {
             ),
             TextButton(
               child: const Text('Salvar'),
-              onPressed: () {
+              onPressed: () async {
                 if (cliente == null) {
-                  // Implement logic to create a new client
+                  final newCliente = Cliente(name: nameController.text);
+                  await Provider.of<ClienteProvider>(context, listen: false)
+                      .createCliente(newCliente);
+                } else if (nameController.text.isNotEmpty) {
+                  final updatedCliente = Cliente(
+                    id: cliente.id,
+                    name: nameController.text,
+                  );
+                  await Provider.of<ClienteProvider>(context, listen: false)
+                      .updateCliente(updatedCliente, cliente.id!);
                 } else {
-                  // Implement logic to update the existing client
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Por favor, preencha todos os dados')),
+                  );
                 }
                 Navigator.of(context).pop();
+                setState(() {
+                  _fetchAllClientes();
+                });
               },
             ),
           ],
@@ -98,130 +112,135 @@ class _ClientesMainState extends State<ClientesMain> {
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    expandedHeight: imageHeight,
-                    floating: false,
-                    pinned: true,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Image.asset(
-                        'assets/images/ClientesBG.png',
-                        fit: BoxFit.cover,
+            : RefreshIndicator(
+                onRefresh: () async {
+                  _fetchAllClientes();
+                },
+              child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      expandedHeight: imageHeight,
+                      floating: false,
+                      pinned: true,
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Image.asset(
+                          'assets/images/ClientesBG.png',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  SliverFillRemaining(
-                    child: Container(
-                      color: const Color(0xFFf1f1f1),
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ElevatedButton.icon(
-                                icon: const Icon(Icons.add),
-                                onPressed: () async {
-                                  _showEditOrCreateDialog().then((value) {
-                                    setState(() {
-                                      _fetchAllClientes();
+                    SliverFillRemaining(
+                      child: Container(
+                        color: const Color(0xFFf1f1f1),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                ElevatedButton.icon(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () async {
+                                    _showEditOrCreateDialog().then((value) {
+                                      setState(() {
+                                        _fetchAllClientes();
+                                      });
                                     });
-                                  });
-                                },
-                                label: const Text('Criar cliente'),
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 8.0),
-                          TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              labelText: 'Filtrar Clientes',
-                              suffixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade400),
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Theme.of(context).primaryColor),
-                                borderRadius: BorderRadius.circular(30.0),
+                                  },
+                                  label: const Text('Criar cliente'),
+                                )
+                              ],
+                            ),
+                            const SizedBox(height: 8.0),
+                            TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                labelText: 'Filtrar Clientes',
+                                suffixIcon: const Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade400),
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 16.0),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: filteredClienteList!.length,
-                              itemBuilder: (context, index) {
-                                final cliente = filteredClienteList![index];
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 16.0),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  child: InkWell(
-                                    onTap: () {
-                                      _showEditOrCreateDialog(cliente: cliente)
-                                          .then((value) {
-                                        setState(() {
-                                          _fetchAllClientes();
+                            const SizedBox(height: 16.0),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: filteredClienteList!.length,
+                                itemBuilder: (context, index) {
+                                  final cliente = filteredClienteList![index];
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 16.0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
+                                        _showEditOrCreateDialog(cliente: cliente)
+                                            .then((value) {
+                                          setState(() {
+                                            _fetchAllClientes();
+                                          });
                                         });
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(16.0),
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFF258F42),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(10.0),
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16.0),
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF258F42),
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(10.0),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(cliente.name,
+                                                      style: const TextStyle(
+                                                        fontSize: 20.0,
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Icon(Icons.edit,
+                                                    color: Theme.of(context)
+                                                        .primaryColor),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                child: Text(cliente.name,
-                                                    style: const TextStyle(
-                                                      fontSize: 20.0,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Icon(Icons.edit,
-                                                  color: Theme.of(context)
-                                                      .primaryColor),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+            ),
       ),
     );
   }
