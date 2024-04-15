@@ -54,12 +54,12 @@ class _LoginViewState extends State<LoginView> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        _buildTextField(_usernameController, 'Email', false,
+                        _buildTextField(_usernameController, 'Usuário', false,
                             focusNode: _usernameFocusNode,
                             textInputAction: TextInputAction.next,
                             nextFocusNode: _passwordFocusNode),
                         const SizedBox(height: 15),
-                        _buildTextField(_passwordController, 'Password', true,
+                        _buildTextField(_passwordController, 'Senha', true,
                             focusNode: _passwordFocusNode,
                             textInputAction: TextInputAction.done),
                         const SizedBox(height: 25),
